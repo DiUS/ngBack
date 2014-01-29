@@ -4,12 +4,30 @@ describe 'Directive: ngBack', ->
 
   beforeEach module 'ngBack'
 
-  scope = {}
+  $window = null
 
-  beforeEach inject ($rootScope) ->
-    scope = $rootScope.$new()
+  beforeEach inject ($rootScope, _$window_) ->
+    $window = _$window_
+    spyOn $window.history, 'back'
 
-  it 'should make hidden element visible', inject ($compile) ->
-    element = angular.element '<ng-back></ng-back>'
-    element = $compile(element) scope
-    expect(element.text()).toBe 'this is the ngBack directive'
+  describe 'when used as an element', ->
+    element = null
+
+    beforeEach inject ($compile) ->
+      element = angular.element '<ng-back>Back</ng-back>'
+      element = $compile(element) {}
+
+    it 'should not work', ->
+      element.triggerHandler 'click'
+      expect($window.history.back).not.toHaveBeenCalled()
+
+  describe 'when clicked', ->
+    element = null
+
+    beforeEach inject ($compile) ->
+      element = angular.element '<a ng-back>Back</a>'
+      element = $compile(element) {}
+      element.triggerHandler 'click'
+
+    it 'should tell the browser to go back', ->
+      expect($window.history.back).toHaveBeenCalled()
